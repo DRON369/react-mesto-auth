@@ -1,15 +1,44 @@
 import Header from "./Header.js";
 import Main from "./Main.js";
 import Footer from "./Footer.js";
+import Login from "./Login.js";
+import Register from "./Register.js";
+import InfoTooltip from "./InfoTooltip.js";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup.js";
 import ImagePopup from "./ImagePopup.js";
 import api from "../utils/api.js";
+import ProtectedRoute from "./ProtectedRoute.js";
 import { useEffect, useState } from "react";
 import { UserContext } from "../contexts/CurrentUserContext.js";
+import { Route, Switch, Redirect, useHistory  } from "react-router-dom";
 
 function App() {
+
+//!==============================================
+  const [userData, setUserData] = useState({
+    username: "",
+    email: "",
+  });
+
+  const [loggedIn, setLoggedIn] = useState({
+    loggedIn: false,
+  });
+
+  const history = useHistory();
+
+  useEffect(() => {
+    if (loggedIn) {
+      history.push("/");
+    }
+  }, [loggedIn])
+
+  function handleLogin({email, password}) {
+
+  }
+//!==============================================
+
   const [currentUser, setCurrentUser] = useState("");
 
   useEffect(() => {
@@ -22,6 +51,8 @@ function App() {
         console.log(`При загрузке данных возникла ошибка: ${err.status}`)
       );
   }, []);
+
+
 
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = useState(false);
@@ -141,15 +172,34 @@ function App() {
         <div className="page">
           <div className="page__container">
             <Header />
-            <Main
-              onEditProfile={handleEditProfileClick}
-              onEditAvatar={handleEditAvatarClick}
-              onAddPlace={handleAddPlaceClick}
-              onCardClick={handleCardClick}
-              cards={cards}
-              onCardLike={handleCardLike}
-              onCardDelete={handleCardDelete}
-            />
+
+            <Switch>
+              <ProtectedRoute
+                exact
+                path="/"
+                loggedIn={loggedIn}
+                component={Main}
+                onEditProfile={handleEditProfileClick}
+                onEditAvatar={handleEditAvatarClick}
+                onAddPlace={handleAddPlaceClick}
+                onCardClick={handleCardClick}
+                cards={cards}
+                onCardLike={handleCardLike}
+                onCardDelete={handleCardDelete}
+              />
+
+              <Route path="/sign-in">
+                <Login onLogin={handleLogin} />
+              </Route>
+
+              <Route path="/sign-up">
+                <Register />
+              </Route>
+
+              <Route>
+                {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
+              </Route>
+            </Switch>
             <Footer />
 
             <EditProfilePopup
