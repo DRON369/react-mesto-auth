@@ -1,16 +1,19 @@
-.header__link {
+.authpage__button {
+  width: 358px;
+  height: 50px;
   font-family: Inter;
   font-style: normal;
   font-weight: normal;
   font-size: 18px;
   line-height: 22px;
-  text-decoration: none;
-  text-align: right;
-  color: #ffffff;
+
+  text-align: center;
+  color: #000000;
   transition: opacity 0.4s ease-in-out;
+  margin-top: 193px;
 }
 
-.header__link:hover {
+.authpage__button:hover {
   cursor: pointer;
-  opacity: 60%;
+  opacity: 80%;
 }

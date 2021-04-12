@@ -9,35 +9,98 @@ import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup.js";
 import ImagePopup from "./ImagePopup.js";
 import api from "../utils/api.js";
+import * as authorization from "../utils/authorization.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 import { useEffect, useState } from "react";
 import { UserContext } from "../contexts/CurrentUserContext.js";
-import { Route, Switch, Redirect, useHistory  } from "react-router-dom";
+import { Route, Switch, Redirect, useHistory } from "react-router-dom";
 
 function App() {
-
-//!==============================================
+  //!==============================================
+  const [isRegOk, setIsRegOk] = useState(false);
+  const [isInfoTooltipPopupOpen, setInfoTooltipPopupOpen] = useState(false);
   const [userData, setUserData] = useState({
-    username: "",
+    id: "",
     email: "",
   });
 
-  const [loggedIn, setLoggedIn] = useState({
-    loggedIn: false,
-  });
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const history = useHistory();
+
+  useEffect(() => {
+    tokenCheck();
+  }, []);
 
   useEffect(() => {
     if (loggedIn) {
       history.push("/");
     }
-  }, [loggedIn])
+  }, [loggedIn]);
 
-  function handleLogin({email, password}) {
-
+  function logout() {
+    localStorage.removeItem("jwt");
+    setLoggedIn(false);
+    setUserData({
+      id: "",
+      email: "",
+    });
+    history.push("/sign-in")
   }
-//!==============================================
+
+  function handleLogin({ email, password }) {
+    authorization
+      .authorize(email, password)
+      .then((data) => {
+        if (!data) throw new Error("Неверные имя пользователя или пароль");
+        if (data.token) {
+          localStorage.setItem("jwt", data.token);
+          tokenCheck();
+          history.push("/");
+        }
+      })
+      .catch((err) =>
+        console.log(`При загрузке данных возникла ошибка: ${err.status}`)
+      );
+  }
+
+  function handleRegister({ email, password }) {
+    authorization
+      .register({ email, password })
+      .then((res) => {
+        if (!res || res.statusCode === 400) {
+          throw new Error("Что-то пошло не так");
+        }
+      })
+      .then(() => {
+        setIsRegOk(true);
+        setInfoTooltipPopupOpen(true);
+        history.push("/sign-in");
+      })
+      .catch((err) => {
+        setIsRegOk(false);
+        setInfoTooltipPopupOpen(true);
+        console.log(`При загрузке данных возникла ошибка: ${err.status}`);
+      });
+  }
+
+  const tokenCheck = () => {
+    if (localStorage.getItem("jwt")) {
+      let jwt = localStorage.getItem("jwt");
+      authorization
+        .getContent(jwt)
+        .then(({ data }) => {
+          if (data._id) {
+            setLoggedIn(true);
+            setUserData({ id: data._id, email: data.email });
+          }
+        })
+        .catch((err) =>
+          console.log(`При загрузке данных возникла ошибка: ${err.status}`)
+        );
+    }
+  };
+  //!==============================================
 
   const [currentUser, setCurrentUser] = useState("");
 
@@ -51,8 +114,6 @@ function App() {
         console.log(`При загрузке данных возникла ошибка: ${err.status}`)
       );
   }, []);
-
-
 
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = useState(false);
@@ -92,6 +153,7 @@ function App() {
     setEditProfilePopupOpen(false);
     setEditAvatarPopupOpen(false);
     setAddPlacePopupOpen(false);
+    setInfoTooltipPopupOpen(false);
   }
 
   function handleUpdateUser(user) {
@@ -171,8 +233,7 @@ function App() {
       <div className="App">
         <div className="page">
           <div className="page__container">
-            <Header />
-
+            <Header loggedIn={loggedIn} userData={userData} onLogout={logout} />
             <Switch>
               <ProtectedRoute
                 exact
@@ -193,7 +254,7 @@ function App() {
               </Route>
 
               <Route path="/sign-up">
-                <Register />
+                <Register onRegister={handleRegister} />
               </Route>
 
               <Route>
@@ -201,6 +262,12 @@ function App() {
               </Route>
             </Switch>
             <Footer />
+
+            <InfoTooltip
+              isOpen={isInfoTooltipPopupOpen}
+              onClose={closeAllPopups}
+              isRegOk={isRegOk}
+            />
 
             <EditProfilePopup
               isOpen={isEditProfilePopupOpen}

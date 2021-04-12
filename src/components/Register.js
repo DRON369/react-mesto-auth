@@ -1,19 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 function Register(props) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  function emailHandler(event) {
+    setEmail(event.target.value);
+  }
+
+  function passwordHandler(event) {
+    setPassword(event.target.value);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    props.onRegister({ email, password });
+  }
+
   return (
-    <div className="authPage authPage_type_register">
-      <div className="authPage__container">
-        <h3 className="authPage__title">Регистрация</h3>
+    <div className="authpage">
+      <div className="authpage__container">
+        <h3 className="authpage__title">Регистрация</h3>
         <form
-          className="authPage__form"
+          className="authpage__form"
           method="POST"
           name="register"
-          onSubmit={props.onSubmit}
+          onSubmit={handleSubmit}
         >
           <input
-            className="authPage__input"
+            className="authpage__input"
             id="email"
             type="email"
             name="email"
@@ -22,29 +38,29 @@ function Register(props) {
             minLength="2"
             maxLength="30"
             required
-            onChange={"" /* handleChangeCardName */}
-            value={"" /* cardName */ || ""}
+            onChange={emailHandler}
+            value={email || ""}
           />
           <span id="email-error" className="error"></span>
 
           <input
-            className="authPage__input"
+            className="authpage__input"
             id="password"
             type="password"
             name="password"
             autoComplete="off"
             placeholder="Пароль"
             required
-            onChange={"" /* handleChangeCardLink */}
-            value={"" /* cardLink */ || ""}
+            onChange={passwordHandler}
+            value={password || ""}
           />
           <span className="error" id="password-error"></span>
 
-          <button className="authPage__submit-button" type="submit">
+          <button className="authpage__button" type="submit">
             Зарегистрироваться
           </button>
         </form>
-        <Link to="/sign-in">Уже зарегистрированы? Войти</Link>
+        <Link className="authpage__link" to="/sign-in">Уже зарегистрированы? Войти</Link>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 function Login(props) {
   const [email, setEmail] = useState("");
@@ -19,17 +19,17 @@ function Login(props) {
   }
 
   return (
-    <div className={`authPage authPage_type_login`}>
-      <div className="authPage__container">
-        <h3 className="authPage__title">Войти</h3>
+    <div className={"authpage"}>
+      <div className="authpage__container">
+        <h3 className="authpage__title">Войти</h3>
         <form
-          className="authPage__form"
+          className="authpage__form"
           method="POST"
           name="login"
           onSubmit={handleSubmit}
         >
           <input
-            className="authPage__input"
+            className="authpage__input"
             id="email"
             type="email"
             name="email"
@@ -44,7 +44,7 @@ function Login(props) {
           <span id="email-error" className="error"></span>
 
           <input
-            className="authPage__input"
+            className="authpage__input"
             id="password"
             type="password"
             name="password"
@@ -56,7 +56,7 @@ function Login(props) {
           />
           <span className="error" id="password-error"></span>
 
-          <button className="authPage__submit-button" type="submit">
+          <button className="authpage__button" type="submit">
             Войти
           </button>
         </form>
